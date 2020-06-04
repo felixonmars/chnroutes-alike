@@ -1,3 +1,7 @@
+# AS8068 Microsoft Anycast
+13.107.0.0/16
+204.79.197.0/24
+
 # AS16509 Amazon Global Accelerator Anycast
 13.248.128.0/17
 75.2.0.0/17
