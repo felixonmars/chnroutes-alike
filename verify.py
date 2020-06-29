@@ -15,17 +15,17 @@ def random_addr_in_range(range):
 
 def read_networks(filename):
     networks = []
-    # Only parse CN2 networks, ignore checking for others
-    cn2flag = False
+    # Only parse CN2 GIA networks, ignore checking for others
+    cn2giaflag = False
     with open(filename, "r") as f:
         for line in f:
             if "#" in line:
-                if "CN2" in line:
-                    cn2flag = True
+                if "CN2 GIA" in line:
+                    cn2giaflag = True
                 else:
-                    cn2flag = False
+                    cn2giaflag = False
 
-            if "/" in line and not line.startswith("#") and cn2flag:
+            if "/" in line and not line.startswith("#") and cn2giaflag:
                 networks.append(line.rstrip("\n"))
     return networks
 
@@ -41,13 +41,24 @@ async def probe(target, ttl):
 async def check(network, ttlrange):
     target = random_addr_in_range(network)
     # TODO
-    ttlrange = list(map(int, ttlrange.split("-")))
-    for ttl in range(ttlrange[0], ttlrange[1] + 1):
+    ttlmin, ttlmax = list(map(int, ttlrange.split("-")))
+    all_timeout = True
+    for ttl in range(ttlmin, ttlmax + 1):
         result = await probe(target, ttl)
-        if result.responder and result.responder.startswith("59.43."):
-            print(colored(f"{network} {target} CN2 detected: {result.responder}", "green"))
-            return
-    print(colored(f"{network} {target} no CN2 detected", "red"))
+        if result.result != 'no-reply':
+            all_timeout = False
+        if result.responder:
+            if result.responder.startswith("59.43."):
+                print(colored(f"{network} {target} CN2 detected: {result.responder}", "green"))
+                return
+            elif result.responder.startswith("202.97."):
+                break
+
+    if all_timeout:
+        print(colored(f"{network} {target} possibly non-routable, trying a different address...", "yellow"))
+        await check(network, ttlrange)
+    else:
+        print(colored(f"{network} {target} no CN2 detected", "red"))
 
 
 if __name__ == "__main__":
