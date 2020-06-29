@@ -61,13 +61,14 @@ async def check(network, ttlrange):
         print(colored(f"{network} {target} no CN2 detected", "red"))
 
 
-if __name__ == "__main__":
+async def main():
     description = "A simple verify library for chnroutes-alike"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-f', '--file', nargs='?', default="chnroutes-alike.txt", help="File to examine")
     parser.add_argument('-n', '--network', nargs='?', help="Check a network range.")
     parser.add_argument('-c', '--count', nargs='?', default=1, help="How many IP address to check in each range")
     parser.add_argument('-t', '--ttlrange', nargs='?', default="5-7", help="TTL to check")
+    parser.add_argument('-j', '--jobs', nargs='?', default=20, help="Concurrent connection limit")
 
     config = parser.parse_args()
 
@@ -76,11 +77,16 @@ if __name__ == "__main__":
     else:
         networks = read_networks(config.file)
 
-    loop = asyncio.get_event_loop()
+    jobs = int(config.jobs)
 
-    targets = []
+    tasks = set()
     for network in networks:
         for _ in range(int(config.count)):
-            targets.append(check(network, config.ttlrange))
+            if len(tasks) >= jobs:
+                _done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            tasks.add(check(network, config.ttlrange))
 
-    loop.run_until_complete(asyncio.wait(targets))
+    await asyncio.wait(tasks)
+
+if __name__ == "__main__":
+    asyncio.run(main())
