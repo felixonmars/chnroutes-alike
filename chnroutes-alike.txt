@@ -63,10 +63,6 @@
 # AS35251 US (Return Only)
 185.245.2.0/23
 
-# AS38365 Baidu CN (should be included in chnroutes2, only routable in CERNET)
-150.242.120.0/24
-150.242.122.0/23
-
 # AS41378 Saltyfish US CN2 GIA
 45.9.8.0/23
 45.9.10.0/24
@@ -110,9 +106,6 @@
 154.17.18.0/23
 154.17.20.0/22
 193.110.200.0/22
-
-# AS56046 China Mobile CN (should be included in chnroutes2)
-103.53.124.0/22
 
 # AS57578 Misaka RU CN2 GIA
 45.131.68.0/23
