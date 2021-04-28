@@ -38,18 +38,20 @@ async def probe(target, ttl):
         return await mtr.probe(target, local_ip=local_addr, ttl=ttl)
 
 
-async def check(network, ttlrange, verbose):
+async def check(network, config):
     target = random_addr_in_range(network)
     # TODO
-    ttlmin, ttlmax = list(map(int, ttlrange.split("-")))
+    ttlmin, ttlmax = list(map(int, config.ttlrange.split("-")))
     all_timeout = True
     for ttl in range(ttlmin, ttlmax + 1):
         result = await probe(target, ttl)
         if result.result != 'no-reply':
             all_timeout = False
         if result.responder:
+            if result.responder in config.ignore:
+                continue
             if result.responder.startswith("59.43."):
-                if verbose:
+                if config.verbose:
                     print(colored(f"{network} {target} CN2 detected: {result.responder}", "green"))
                 return
             elif result.responder.startswith("202.97."):
@@ -57,7 +59,7 @@ async def check(network, ttlrange, verbose):
 
     if all_timeout:
         print(colored(f"{network} {target} possibly non-routable, trying a different address...", "yellow"))
-        await check(network, ttlrange, verbose)
+        await check(network, config)
     else:
         print(colored(f"{network} {target} no CN2 detected", "red"))
 
@@ -70,6 +72,7 @@ async def main():
     parser.add_argument('-c', '--count', nargs='?', default=1, help="How many IP address to check in each range")
     parser.add_argument('-t', '--ttlrange', nargs='?', default="5-7", help="TTL to check")
     parser.add_argument('-j', '--jobs', nargs='?', default=20, help="Concurrent connection limit")
+    parser.add_argument('-i', '--ignore', nargs='*', default=[], help="Ignore certain IP address in detection")
     parser.add_argument('-v', '--verbose', action="store_true", help="Verbose output")
 
     config = parser.parse_args()
@@ -86,7 +89,8 @@ async def main():
         for _ in range(int(config.count)):
             if len(tasks) >= jobs:
                 _done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            tasks.add(check(network, config.ttlrange, config.verbose))
+            task = asyncio.create_task(check(network, config))
+            tasks.add(task)
 
     await asyncio.wait(tasks)
 
