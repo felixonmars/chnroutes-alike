@@ -125,6 +125,7 @@
 
 # AS50131 Spartan Host (Return Optimized)
 45.142.158.0/23
+104.218.235.0/24
 
 # AS54574 DMIT HK CN2 GIA
 103.117.100.0/22
