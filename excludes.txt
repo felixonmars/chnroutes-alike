@@ -2,6 +2,9 @@
 13.107.42.13
 13.107.43.13
 
+# Linkedin
+13.107.42.14
+
 # https://github.com/misakaio/chnroutes2/issues/25
 223.118.0.0/15
 223.120.0.0/15
