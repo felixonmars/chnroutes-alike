@@ -4,7 +4,6 @@ import asyncio
 import ipaddress
 import mtrpacket
 import random
-import socket
 from termcolor import colored
 
 
@@ -30,12 +29,9 @@ def read_networks(filename):
     return networks
 
 
-local_addr = socket.gethostbyname(socket.gethostname())
-
-
 async def probe(target, ttl):
     async with mtrpacket.MtrPacket() as mtr:
-        return await mtr.probe(target, local_ip=local_addr, ttl=ttl)
+        return await mtr.probe(target, ttl=ttl)
 
 
 async def check(network, config):
