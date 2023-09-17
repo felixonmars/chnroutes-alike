@@ -16,3 +16,6 @@
 # https://github.com/misakaio/chnroutes2/issues/25
 223.118.0.0/15
 223.120.0.0/15
+
+# Vercel
+76.76.21.21
