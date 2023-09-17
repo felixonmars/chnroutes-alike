@@ -10,12 +10,6 @@
 # Linkedin
 13.107.42.14
 
-# Hostloc
-23.225.155.86
-
 # https://github.com/misakaio/chnroutes2/issues/25
 223.118.0.0/15
 223.120.0.0/15
-
-# Vercel
-76.76.21.21
